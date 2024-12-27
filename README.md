@@ -23,6 +23,7 @@ Available Solvers:
 6. Backtracking - O(9^n)
 
 Choose a solver (1-6):
+
 Use visualization? (y/n):
 
 
