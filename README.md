@@ -12,7 +12,9 @@ Saw a reel where someone wrote a sudoku solver that brute forced the puzzle and 
 
 Run the solver.py file to see the different solvers and their time complexities with a visualizer.
 
-__Example__ solver.py
+__Example__
+
+solver.py
 
 __Output__
 
