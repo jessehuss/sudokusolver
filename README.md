@@ -14,7 +14,7 @@ Run the solver.py file to see the different solvers and their time complexities 
 
 __Example__
 
-solver.py
+<code>solver.py</code>
 
 __Output__
 
