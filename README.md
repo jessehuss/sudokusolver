@@ -1,5 +1,7 @@
 # Sudoku Solver
 
+Saw a reel where someone wrote a sudoku solver that brute forced the puzzle and wanted to write my own solvers using different techniques and algorithms.
+
 ## Requirements
 
 - Python 3.10+
@@ -10,7 +12,7 @@
 
 Run the solver.py file to see the different solvers and their time complexities with a visualizer.
 
-Saw a reel where someone wrote a sudoku solver that brute forced the puzzle and wanted to write my own solvers using different techniques and algorithms.
+## Solvers
 
 | **Technique**                  | **Time Complexity**         | **Description**                                                                                 | **When to Use**                                                                                       |
 |--------------------------------|-----------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
