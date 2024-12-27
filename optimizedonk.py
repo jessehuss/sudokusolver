@@ -1,7 +1,7 @@
 from heapq import heappush, heappop
 from itertools import product
 
-def solve_sudoku(board):
+def solve_sudoku(board, visualizer=None):
     """
     Optimized Sudoku solver using constraint propagation, logical deduction, and limited backtracking.
     """
@@ -9,12 +9,17 @@ def solve_sudoku(board):
     possibilities = initialize_possibilities(board)
     pq = initialize_priority_queue(possibilities, board)
 
+    # Show initial board
+    if visualizer:
+        if not visualizer.update(board):
+            return False
+
     # Solve using advanced techniques
-    if solve_with_techniques(board, possibilities, pq):
+    if solve_with_techniques(board, possibilities, pq, visualizer):
         return True
 
     # Fallback: Minimal backtracking for remaining unsolved cells
-    return backtracking_solver(board, possibilities)
+    return backtracking_solver(board, possibilities, visualizer)
 
 
 def initialize_possibilities(board):
@@ -69,7 +74,7 @@ def initialize_priority_queue(possibilities, board):
     return pq
 
 
-def solve_with_techniques(board, possibilities, pq):
+def solve_with_techniques(board, possibilities, pq, visualizer=None):
     """
     Apply logical techniques to solve the puzzle.
     """
@@ -79,18 +84,26 @@ def solve_with_techniques(board, possibilities, pq):
         if board[row][col] != 0:
             continue  # Skip solved cells
 
+        # Update visualization to show cell being considered
+        if visualizer:
+            if not visualizer.update(board, (row, col)):
+                return False
+
         # Single possibility
         if bin(possibilities[row][col]).count('1') == 1:
             num = possibilities[row][col].bit_length()
             board[row][col] = num
             update_possibilities(board, possibilities, row, col, num)
             pq = dynamic_priority_update(pq, possibilities, row, col)
+            
+            # Update visualization with placed number
+            if visualizer:
+                if not visualizer.update(board, (row, col), num):
+                    return False
 
-        # Apply advanced logical techniques (Naked Pairs, Pointing Pairs)
+        # Apply advanced logical techniques
         elif apply_logical_deductions(board, possibilities, pq):
             continue
-
-        # If no progress, return False to trigger backtracking
         else:
             return False
 
@@ -176,21 +189,38 @@ def dynamic_priority_update(pq, possibilities, row, col):
     return pq
 
 
-def backtracking_solver(board, possibilities):
+def backtracking_solver(board, possibilities, visualizer=None):
     """
     Fallback to limited backtracking to resolve unsolved cells.
     """
     for row in range(9):
         for col in range(9):
             if board[row][col] == 0:
+                # Show cell being considered
+                if visualizer:
+                    if not visualizer.update(board, (row, col)):
+                        return False
+
                 for num in range(1, 10):
                     if possibilities[row][col] & (1 << (num - 1)):
                         board[row][col] = num
                         new_possibilities = [row[:] for row in possibilities]
                         update_possibilities(board, new_possibilities, row, col, num)
-                        if solve_sudoku(board):
+                        
+                        # Show attempted number
+                        if visualizer:
+                            if not visualizer.update(board, (row, col), num):
+                                return False
+
+                        if solve_sudoku(board, visualizer):
                             return True
                         board[row][col] = 0
+                        
+                        # Show backtrack
+                        if visualizer:
+                            if not visualizer.update(board, (row, col)):
+                                return False
+
                 return False
     return True
 
@@ -201,22 +231,3 @@ def is_solved(board):
     """
     return all(all(cell != 0 for cell in row) for row in board)
 
-
-# Example usage
-sudoku_board = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
-
-if solve_sudoku(sudoku_board):
-    for row in sudoku_board:
-        print(row)
-else:
-    print("No solution exists.")

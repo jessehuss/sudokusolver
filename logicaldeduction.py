@@ -1,27 +1,39 @@
-def solve_sudoku(board):
+def solve_sudoku(board, visualizer=None):
     """
     Solves the Sudoku puzzle using logical deduction only.
     :param board: 9x9 2D list representing the Sudoku board
+    :param visualizer: Optional SudokuVisualizer instance
     :return: True if solved, False if unsolvable
     """
     while True:
-        # Apply constraints and try to reduce possibilities
         changed = False
         for row in range(9):
             for col in range(9):
                 if board[row][col] == 0:
+                    # Update visualizer to show cell being checked
+                    if visualizer:
+                        if not visualizer.update(board, (row, col)):
+                            return False
+
                     possibilities = find_possibilities(board, row, col)
                     if len(possibilities) == 1:
-                        # Naked single (only one possible number)
-                        board[row][col] = possibilities.pop()
+                        value = possibilities.pop()
+                        board[row][col] = value
                         changed = True
+                        
+                        # Update visualizer to show number placement
+                        if visualizer:
+                            if not visualizer.update(board, (row, col), value):
+                                return False
 
         if is_solved(board):
-            return True  # Solved
+            # Show final state
+            if visualizer:
+                visualizer.update(board)
+            return True
         if not changed:
-            break  # No further progress can be made logically
+            break
 
-    # If we reach here, the puzzle is unsolvable with pure logic
     return False
 
 
@@ -64,22 +76,3 @@ def is_solved(board):
             return False
     return True
 
-
-# Example usage
-sudoku_board = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
-
-if solve_sudoku(sudoku_board):
-    for row in sudoku_board:
-        print(row)
-else:
-    print("No solution exists.")

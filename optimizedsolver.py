@@ -1,9 +1,10 @@
 from heapq import heappush, heappop
 
-def solve_sudoku(board):
+def solve_sudoku(board, visualizer=None):
     """
     Optimized Sudoku solver using bitmasking, advanced logical techniques, and heuristics.
     :param board: 9x9 2D list representing the Sudoku board
+    :param visualizer: Optional visualizer instance
     :return: True if solved, False otherwise
     """
     # Initialize possibilities with bitmasking
@@ -19,6 +20,11 @@ def solve_sudoku(board):
         if board[row][col] != 0:
             continue
 
+        # Visualize cell being considered
+        if visualizer:
+            if not visualizer.update(board, (row, col)):
+                return False
+
         # Get possibilities using bitmask
         options = possibilities[row][col]
         bit_count = bin(options).count("1")
@@ -27,6 +33,12 @@ def solve_sudoku(board):
             # Only one possibility: solve it
             num = options.bit_length()
             board[row][col] = num
+            
+            # Visualize number placement
+            if visualizer:
+                if not visualizer.update(board, (row, col), num):
+                    return False
+            
             update_possibilities(board, possibilities, row, col, num)
             pq = initialize_priority_queue(possibilities, board)
         else:
@@ -104,22 +116,3 @@ def is_solved(board):
             return False
     return True
 
-
-# Example usage
-sudoku_board = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
-
-if solve_sudoku(sudoku_board):
-    for row in sudoku_board:
-        print(row)
-else:
-    print("No solution exists.")

@@ -1,5 +1,10 @@
 # Sudoku Solver
 
+## Requirements
+
+- Python 3.10+
+- pip install -r requirements.txt
+
 Saw a reel where someone wrote a sudoku solver that brute forced the puzzle and wanted to write my own solvers using different techniques and algorithms.
 
 | **Technique**                  | **Time Complexity**         | **Description**                                                                                 | **When to Use**                                                                                       |

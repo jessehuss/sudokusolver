@@ -1,43 +1,52 @@
 from heapq import heappush, heappop
 from itertools import product
+from visualizer import SudokuVisualizer
 
-def solve_sudoku(board):
+def solve_sudoku(board, visualizer=None):
     """
-    Enhanced Sudoku solver with advanced logical techniques, dynamic updates, and limited backtracking.
+    Enhanced Sudoku solver with Pygame visualization.
     :param board: 9x9 2D list representing the Sudoku board
+    :param visualizer: SudokuVisualizer instance
     :return: True if solved, False otherwise
     """
     # Initialize possibilities with bitmasking
     possibilities = initialize_possibilities(board)
-    
-    # Priority queue: Focus on cells with the fewest possibilities (MRV heuristic)
     pq = initialize_priority_queue(possibilities, board)
+    
+    # Show initial board state
+    if visualizer:
+        if not visualizer.update(board):
+            return False
 
-    # Main solving loop
     while pq:
         _, (row, col) = heappop(pq)
 
-        # Skip if already solved
         if board[row][col] != 0:
             continue
 
-        # Get possibilities using bitmask
         options = possibilities[row][col]
         bit_count = bin(options).count("1")
 
         if bit_count == 1:
-            # Only one possibility: solve it
             num = options.bit_length()
+            # Show cell being considered
+            if visualizer:
+                if not visualizer.update(board, (row, col)):
+                    return False
+                
             board[row][col] = num
             update_possibilities(board, possibilities, row, col, num)
             pq = dynamic_priority_update(pq, possibilities, row, col)
+            
+            # Show number placement
+            if visualizer:
+                if not visualizer.update(board, (row, col), num):
+                    return False
         elif bit_count == 0:
-            # No possibilities left, backtrack
             return False
         else:
-            # Use limited backtracking if logical deduction stalls
             if not logical_deduction(board, possibilities, pq):
-                return backtracking_solver(board, possibilities)
+                return backtracking_solver(board, possibilities, visualizer)
 
     return is_solved(board)
 
@@ -148,21 +157,37 @@ def find_naked_pairs(board, possibilities, row, col):
     return False
 
 
-def backtracking_solver(board, possibilities):
+def backtracking_solver(board, possibilities, visualizer=None):
     """
-    Fallback to backtracking if logical deductions are insufficient.
+    Fallback to backtracking with visualization support.
     """
     for row in range(9):
         for col in range(9):
             if board[row][col] == 0:
                 for num in range(1, 10):
                     if possibilities[row][col] & (1 << (num - 1)):
+                        # Show cell being considered
+                        if visualizer:
+                            if not visualizer.update(board, (row, col)):
+                                return False
+                        
                         board[row][col] = num
                         new_possibilities = [row[:] for row in possibilities]
                         update_possibilities(board, new_possibilities, row, col, num)
-                        if solve_sudoku(board):
+                        
+                        # Show number placement
+                        if visualizer:
+                            if not visualizer.update(board, (row, col), num):
+                                return False
+                        
+                        if solve_sudoku(board, visualizer):
                             return True
+                        
                         board[row][col] = 0
+                        # Show backtracking
+                        if visualizer:
+                            if not visualizer.update(board, (row, col)):
+                                return False
                 return False
     return True
 
@@ -176,22 +201,3 @@ def is_solved(board):
             return False
     return True
 
-
-# Example usage
-sudoku_board = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
-
-if solve_sudoku(sudoku_board):
-    for row in sudoku_board:
-        print(row)
-else:
-    print("No solution exists.")

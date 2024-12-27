@@ -1,9 +1,10 @@
 from heapq import heappush, heappop
 
-def solve_sudoku(board):
+def solve_sudoku(board, visualizer=None):
     """
     Solves Sudoku using constraint propagation and priority-based cell selection.
     :param board: 9x9 2D list representing the Sudoku board
+    :param visualizer: Optional visualizer instance
     :return: True if the board is solvable, False otherwise
     """
     possibilities = initialize_possibilities(board)
@@ -16,11 +17,22 @@ def solve_sudoku(board):
         if board[row][col] != 0:
             continue
 
+        # Show cell being considered
+        if visualizer:
+            if not visualizer.update(board, (row, col)):
+                return False
+
         # Get remaining possibilities for this cell
         options = possibilities[row][col]
         if len(options) == 1:
             num = options.pop()
             board[row][col] = num
+            
+            # Show number being placed
+            if visualizer:
+                if not visualizer.update(board, (row, col), num):
+                    return False
+                
             update_possibilities(board, possibilities, row, col, num)
             pq = initialize_priority_queue(possibilities)  # Rebuild queue
         else:
@@ -90,22 +102,3 @@ def is_solved(board):
             return False
     return True
 
-
-# Example usage
-sudoku_board = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
-
-if solve_sudoku(sudoku_board):
-    for row in sudoku_board:
-        print(row)
-else:
-    print("No solution exists.")
